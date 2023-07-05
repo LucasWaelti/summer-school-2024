@@ -743,40 +743,50 @@ void MrimStateMachine::loadTrajectoryTimerOneshot([[maybe_unused]] const ros::Ti
     srv_out.request.trajectory = trajectory_2;
   }
 
+  std::string srv_out_mpc_tracker_message = "MPC tracker was not found in tracker names!";
+  std::string srv_out_current_active_tracker = "No message from current active tracker";
+  bool srv_call_ret = false;
   for (int i = 0; i < service_call_repeat_; i++) {
 
     if (id == 1) {
-      service_client_load_trajectory_1.call(srv_out);
+      srv_call_ret = service_client_load_trajectory_1.call(srv_out);
     } else {
-      service_client_load_trajectory_2.call(srv_out);
+      srv_call_ret = service_client_load_trajectory_2.call(srv_out);
     }
+    srv_out_current_active_tracker = srv_out.response.message;
+  
+    ROS_WARN("[MrimStateMachine]: (traj. ID: %d, n. of repetitions: %d) Return value of load trajectory service call: %d", id, i, srv_call_ret);
+    ROS_WARN("[MrimStateMachine]: (traj. ID: %d, n. of repetitions: %d) Response of current active tracker after load trajectory service call: %s", id, i, srv_out_current_active_tracker.c_str());
 
     if (!srv_out.response.success) {
       // returned false because the MPC tracker is not currently active
-
       for (unsigned int i = 0; i < srv_out.response.tracker_names.size(); i++) {
         if (srv_out.response.tracker_names[i] == "MpcTracker") {
+          srv_out_mpc_tracker_message = srv_out.response.tracker_messages[i];
           if (srv_out.response.tracker_successes[i]) {
             // trajectory is feasible for the MPC tracker
             goto loaded;
           }
         }
       }
-      ROS_ERROR("[MrimStateMachine]: call for loading trajectory (%d) failed", id);
-    } else {
-    loaded:
+      ROS_ERROR("[MrimStateMachine]: (traj. ID: %d, n. of repetitions: %d) call for loading trajectory (%d) failed", id, i, id);
+      ROS_ERROR("[MrimStateMachine]: (traj. ID: %d, n. of repetitions: %d) Response of MPC tracker: %s", id, i, srv_out_mpc_tracker_message.c_str());
+    } 
+    else {
+      loaded:
 
-      ROS_INFO("[MrimStateMachine]: trajectory loaded (%d)", id);
+        ROS_INFO("[MrimStateMachine]: (traj. ID: %d, n. of repetitions: %d) trajectory loaded (%d)", id, i, id);
+        ROS_INFO("[MrimStateMachine]: (traj. ID: %d, n. of repetitions: %d) Response of MPC tracker: %s", id, i, srv_out_mpc_tracker_message.c_str());
 
-      if (id == 1) {
-        got_trajectory_1    = false;
-        trajectory_1_loaded = true;
-      } else {
-        got_trajectory_2    = false;
-        trajectory_2_loaded = true;
-      }
+        if (id == 1) {
+          got_trajectory_1    = false;
+          trajectory_1_loaded = true;
+        } else {
+          got_trajectory_2    = false;
+          trajectory_2_loaded = true;
+        }
 
-      break;
+        break;
     }
   }
 }
