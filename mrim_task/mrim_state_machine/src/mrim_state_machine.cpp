@@ -939,7 +939,7 @@ void MrimStateMachine::switchState(State_t new_state) {
           ROS_INFO("[MrimStateMachine]: Mission timer started.");
           break;
         } else {
-          ROS_ERROR("[MrimStateMachine]: Call for mission timer start fail.");
+          ROS_ERROR("[MrimStateMachine]: (n. of repetitions: %d) Call for mission timer start fail (success: %d): '%s'.", i, srv.response.success, srv.response.message.c_str());
         }
       }
 
