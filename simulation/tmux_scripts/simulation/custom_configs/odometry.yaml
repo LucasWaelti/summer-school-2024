@@ -10,3 +10,6 @@ altitude:
   max_default: 50.0 # Used only when safety area is not used
   max_allowed_flight_height_garmin: 50.0 # Do not allow flying higher with garmin-based altitude estimator
   
+# rates of publishers# #{
+publish_rate:
+  main: 50 # [Hz] main and aux odometry
