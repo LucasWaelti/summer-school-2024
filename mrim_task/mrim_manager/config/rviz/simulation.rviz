@@ -84,7 +84,7 @@ Visualization Manager:
           Min Color: 0; 0; 0
           Name: Obstacles
           Position Transformer: XYZ
-          Queue Size: 10
+          Queue Size: 2
           Selectable: true
           Size (Pixels): 3
           Size (m): 0.07999999821186066
